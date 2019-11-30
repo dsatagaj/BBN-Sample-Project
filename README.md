@@ -15,7 +15,7 @@ Please note that the input files should be in the following format:\
 #start, end, day of week\
 2018-05-02, 2018-12-31, Wednesday\
 2019-01-01, 2019-12-31, Thursday\
-...\
+...
 
 # Sources used: 
 # To get up to speed on calendar class
