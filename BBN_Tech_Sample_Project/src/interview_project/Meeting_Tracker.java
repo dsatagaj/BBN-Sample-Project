@@ -17,22 +17,23 @@ public class Meeting_Tracker {
 	
 	
 	public static void main(String[] args) {
+		//variables needed only in main
 		int temp = 0, option_tracker = 0, whilechecker = 0, tempchecker = 0;
 		int number_of_options = 10;
 		String filename;
-		Meeting_Tracker x = new Meeting_Tracker();
-		
+		//initial comments
 		System.out.println("Welcome to this portion of the Calendar/Scheduling Application.");
 		System.out.println("Please note that the application factors in how many meetings will be missed due to user-specified holidays.");
 		System.out.println("To view this project on github, please see https://github.com/dsatagaj/BBN-Sample-Project.");
 		System.out.println("To give feedback to David Satagaj, the creator, please email drsatagaj@liberty.edu\n\n");
-		System.out.println(System.getProperty("user.dir"));
+		
+		
 		while (whilechecker == 0)
 		{
 			printOptions();
-			while(tempchecker == 0) {
+			while(tempchecker == 0) {//make sure option chosen is an integer
 				try {
-					temp = Integer.parseInt(x.scan.nextLine());
+					temp = Integer.parseInt(scan.nextLine());
 					option_tracker = temp;
 					tempchecker = 1;
 				}
@@ -41,41 +42,41 @@ public class Meeting_Tracker {
 				}
 			}
 			tempchecker = 0;
-			while(option_tracker < 0 || option_tracker > number_of_options) {
+			while(option_tracker < 0 || option_tracker > number_of_options) { //make sure integer is a valid option
 				System.out.println("Invalid Option Selected, Please Try Again");
 				try {
-					temp = Integer.parseInt(x.scan.nextLine());
+					temp = Integer.parseInt(scan.nextLine());
 					option_tracker = temp;
 				}
 				catch(NumberFormatException e) {
 					System.out.println("Please enter an integer.");
 				}				
 			}
-			switch(option_tracker) {
+			switch(option_tracker) {//switch statement for options
 			case 1 : //option for getting meetings to the end of the year (12/31/yyyy)
-				System.out.println("There are " + x.mtgstoEndofYear() + " meetings until the end of the year.");
+				System.out.println("There are " + mtgstoEndofYear() + " meetings until the end of the year.");
 				break;
 			case 2 : //option for getting meetings between today and a definable date
-				System.out.println("There are " + x.mtgstoDefinableDate() + " meetings between \ntoday and " + x.other_date.getTime() + ".");
+				System.out.println("There are " + mtgstoDefinableDate() + " meetings between \ntoday and " + other_date.getTime() + ".");
 				break;
 			case 3 : //option for getting meetings between two dates
-				System.out.println("There are " + x.mtgstoTwoDefDates() + " meetings between \n" + 
-						x.other_date.getTime() + " and " + x.other_date_2.getTime() + ".");
+				System.out.println("There are " + mtgstoTwoDefDates() + " meetings between \n" + 
+						other_date.getTime() + " and " + other_date_2.getTime() + ".");
 				break;
 			case 4 : //option for changing meeting day
-				if(x.changeMtgDay() == 1)
-					System.out.println("Meeting Day changed successfully to " + x.getMtgDay());
+				if(changeMtgDay() == 1)
+					System.out.println("Meeting Day changed successfully to " + getMtgDay());
 				else
 					System.out.println("Error changing meeting day, please try again.");
 				break;
 			case 5 : //option for printing out current meeting day
-				System.out.println("The current meeting day is: " + x.getMtgDay() + ".");
+				System.out.println("The current meeting day is: " + getMtgDay() + ".");
 				break;
 			case 6 : //option for adding no meeting dates
-				x.addNoMeetingDate();
+				addNoMeetingDate();
 				break;
 			case 7 : //option for removing no meeting dates
-				x.removeNoMeetingDate();
+				removeNoMeetingDate();
 				break;
 			case 8 : //option for printing no meeting dates
 				printNoMeetingDates();
@@ -100,7 +101,8 @@ public class Meeting_Tracker {
 
 	}
 
-	public static void readFromInputFile(String filename) throws IOException {
+	public static void readFromInputFile(String filename) throws IOException { //read input from file
+		//variables only for this function
 		boolean filechecker = false;
 		BufferedReader reader = new BufferedReader(new FileReader(filename));
 		String cell;
@@ -108,27 +110,27 @@ public class Meeting_Tracker {
 		Vector<String> data = new Vector<String>();
 		
 		
-		filechecker = true;
+		filechecker = true; //only makes it this far if filename is valid
 		if(filechecker) {
 			while((cell = reader.readLine()) != null) {
-				if(!cell.contains("#")) {
-					String[] temp = cell.split(",");
+				if(!cell.contains("#")) { //ignores commented lines in csv file
+					String[] temp = cell.split(","); //splits by cell
 					for(int i = 0; i < temp.length; i++) {
-						temp[i] = temp[i].replace(" ", "");
+						temp[i] = temp[i].replace(" ", ""); //gets rid of spaces
 						data.add(temp[i]);
 					}
 				}
 			}
 		}
-		for(int i = 0; i < data.size() - 1; i = i + 3) {
+		for(int i = 0; i < data.size() - 1; i = i + 3) { //sorts through data if properly formatted
 			if(data.get(i).contains("-") && data.get(i+1).contains("-") && data.get(i+2).contains("day")) {
-				String[] day1 = data.get(i).split("-");
-				String[] day2 = data.get(i+1).split("-");
-				String dow = data.get(i+2).substring(0,3);
+				String[] day1 = data.get(i).split("-"); //splits date into components
+				String[] day2 = data.get(i+1).split("-"); //splits date into its components
+				String dow = data.get(i+2).substring(0,3); //gets day of the week (shortened form, e.g. Mon)
 				setOtherDate(Integer.parseInt(day1[0]), Integer.parseInt(day1[1]), Integer.parseInt(day1[2]));
-				setOtherDate(Integer.parseInt(day2[0]), Integer.parseInt(day2[1]), Integer.parseInt(day2[2]));
+				setOtherDate2(Integer.parseInt(day2[0]), Integer.parseInt(day2[1]), Integer.parseInt(day2[2]));
 				changeMtgDay(dow);
-				numMtgs = mtgstoTwoDefDates(other_date, other_date_2);
+				numMtgs = mtgstoTwoDefDates(other_date, other_date_2); //calculate number of meetings
 				System.out.println("The number of meetings between " + dateformat.format(other_date.getTime()) + 
 						" and " + dateformat.format(other_date_2.getTime()) + " is " + numMtgs);
 				
@@ -141,8 +143,8 @@ public class Meeting_Tracker {
 		reader.close();
 	}
 	
-	public static void addNoMeetingDate()
-	{
+	public static void addNoMeetingDate() { //add dates that will not have meetings (e.g. holidays)
+		//variables only for this function
 		int temp = 0, tempchecker = 0, year = 0, month = 0, date = 0;
 		Calendar tempcal = Calendar.getInstance();
 		
@@ -230,21 +232,21 @@ public class Meeting_Tracker {
 		}
 		//set temp date so it can be added to vector noMtgDates
 		tempcal.set(year, month - 1, date);
-		noMtgDates.add(tempcal);
+		noMtgDates.add(tempcal); //add a no meeting date to the vector
 	}
 	
-	public static void removeNoMeetingDate()
-	{
+	public static void removeNoMeetingDate() { //remove No Meeting dates from the list
+		//variables only for this function
 		int tempchecker = 0, temp, todelete = 0;
 		Calendar tempcal;
-		if(noMtgDates.size() == 0) {
+		if(noMtgDates.size() == 0) { //check if size is 0
 			System.out.println("There are currently no dates in the No Meeting Date list.");
 		}
 		else {
 			System.out.println("The current No Meeting Dates are:");
 			printNoMeetingDates();
 			System.out.println("Please enter the index (number) of the No Meeting Date you wish to delete.");
-			while(tempchecker == 0) {
+			while(tempchecker == 0) { //make sure we get an integer
 				try {
 					temp = Integer.parseInt(scan.nextLine());
 					todelete = temp;
@@ -254,7 +256,7 @@ public class Meeting_Tracker {
 					System.out.println("Please enter an integer.");
 				}
 			}
-			while(todelete > noMtgDates.size() || todelete < 0)
+			while(todelete > noMtgDates.size() || todelete < 0) //make sure number is valid
 			{
 				System.out.println("An invalid number was entered. Please try again.");
 				try {
@@ -268,12 +270,11 @@ public class Meeting_Tracker {
 			}
 			tempcal = noMtgDates.get(todelete - 1);
 			System.out.println("The date that is being deleted is " + dateformat.format(tempcal.getTime()));
-			noMtgDates.remove(todelete - 1);
+			noMtgDates.remove(todelete - 1); //delete correct date (note vector is zero-indexed but user list isn't
 		}
 	}
 	
-	public static void printNoMeetingDates()
-	{
+	public static void printNoMeetingDates() { //Loop to print no meeting dates
 		int ret = 0;
 		Calendar temp;
 		if(noMtgDates.size() == 0) {
@@ -289,7 +290,7 @@ public class Meeting_Tracker {
 		}
 	}
 	
-	public static void printOptions() {
+	public static void printOptions() { //print all options for main menu
 		System.out.println("\nMeeting Calculation Options:");
 		System.out.println("Please Enter the Number of the Option You'd like to Select.\n");
 		System.out.println("\t~1. Calculate Meetings to the End of the Year");
@@ -304,8 +305,7 @@ public class Meeting_Tracker {
 		System.out.println("\t~10. Exit Program");
 	}
 	
-	public static int mtgstoEndofYear()
-	{
+	public static int mtgstoEndofYear() { //calculate meetings until the end of the year
 		//Set other date to Dec. 31 of current year
 		setOtherDate(cal.get(Calendar.YEAR), 11, 31);
 		//necessary variables
@@ -337,10 +337,10 @@ public class Meeting_Tracker {
 		//remaining meetings is equal to 1 plus remaining days divided by 7
 		remaining_mtgs = 1 + ((int)days_to_eoy/7);
 		
-		return remaining_mtgs - checkNoMtgDate(cal, other_date);
+		return remaining_mtgs - checkNoMtgDate(cal, other_date); //return number of meetings minus any No Meeting Dates (if applic.)
 	}
 	
-	public static int mtgstoDefinableDate() {
+	public static int mtgstoDefinableDate() { //calculate meetings until date of users choice
 		//variable definitions
 		int temp = 0, tempchecker = 0, year = 0, month = 0, date = 0;
 		int index = 0; //index of day of the week
@@ -349,6 +349,130 @@ public class Meeting_Tracker {
 		//user inputs
 		System.out.println("The current date is " + dateformat.format(cal.getTime()) + ". Please choose a date after this one.");
 		System.out.print("Please enter the year to read until: ");
+		while(tempchecker == 0) {
+			try {
+				temp = Integer.parseInt(scan.nextLine());
+				year = temp;
+				tempchecker = 1;
+			}
+			catch(NumberFormatException e) {
+				System.out.println("Please enter an integer.");
+			}
+		}
+		while(year < cal.get(Calendar.YEAR) || year > cal.get(Calendar.YEAR) + 2 ) { //ARBITRARILY limited to up to 2 years in the future
+			System.out.println("Invalid year entered, please try again. (Please note this works up to two years in the future.)");
+			tempchecker = 0;
+			while(tempchecker == 0) {
+				try {
+					temp = Integer.parseInt(scan.nextLine());
+					year = temp;
+					tempchecker = 1;
+				}
+				catch(NumberFormatException e) {
+					System.out.println("Please enter an integer.");
+				}
+			}
+		}
+		System.out.print("Please enter the month to read until: ");
+		tempchecker = 0;
+		while(tempchecker == 0) {
+			try {
+				temp = Integer.parseInt(scan.nextLine());
+				month = temp;
+				tempchecker = 1;
+			}
+			catch(NumberFormatException e) {
+				System.out.println("Please enter an integer.");
+			}
+		}
+		while((month < cal.get(Calendar.MONTH) && year == cal.get(Calendar.YEAR)) || month > 12) { 
+			System.out.println("Invalid month entered, please try again. "
+					+ "(Please note date being entered must be further in the future to today)");
+			tempchecker = 0;
+			while(tempchecker == 0) {
+				try {
+					temp = Integer.parseInt(scan.nextLine());
+					month = temp;
+					tempchecker = 1;
+				}
+				catch(NumberFormatException e) {
+					System.out.println("Please enter an integer.");
+				}
+			}
+		}
+		System.out.print("Please enter the date to read until: ");
+		tempchecker = 0;
+		while(tempchecker == 0) {
+			try {
+				temp = Integer.parseInt(scan.nextLine());
+				date = temp;
+				tempchecker = 1;
+			}
+			catch(NumberFormatException e) {
+				System.out.println("Please enter an integer.");
+			}
+		}
+		while( (date < cal.get(Calendar.DATE) && year == cal.get(Calendar.YEAR) && month == cal.get(Calendar.MONTH) + 1) || date > 31) { 
+			System.out.println("Invalid date entered, please try again. "
+					+ "(Please note date being entered must be further in the future to today)");
+			tempchecker = 0;
+			while(tempchecker == 0) {
+				try {
+					temp = Integer.parseInt(scan.nextLine());
+					date = temp;
+					tempchecker = 1;
+				}
+				catch(NumberFormatException e) {
+					System.out.println("Please enter an integer.");
+				}
+			}
+		}
+		//set other date
+		setOtherDate(year, month - 1, date); //set user defined date
+		
+		
+		//find ms between current day and other date
+		long start = cal.getTimeInMillis(); //today's date in ms
+		long end = other_date.getTimeInMillis(); //other date in ms
+		long ms_to_days = 1000*60*60*24; //ms * sec * min * hrs
+		long days_to_other_date = (end-start)/ms_to_days; //days to other date
+		String strDate = dateformat.format(cal.getTime()); //current day of the week
+		strDate = strDate.substring(0,3); //just the day of the week
+		
+		//sets index to be the index of the current day (begins at 0)
+		for(int i = 0; i < days.length; i++) {
+			if(days[i].contains(strDate)) {
+				index = i;
+			}
+		}
+		
+		//moves to day of next meeting
+		while(index != getMtgDayInt()) { //checks index against index of meeting day
+			days_to_other_date --; //changes amount of days to other date
+			index++; //keeps changing index if it does not equal index of meeting day
+			if(index == 7) //rolls index over if meeting day is prior to current day of week
+				index = 0;
+		}
+		//remaining meetings is equal to 1 plus remaining days divided by 7
+		remaining_mtgs = 1 + ((int)days_to_other_date/7);
+		
+		return remaining_mtgs - checkNoMtgDate(cal, other_date); //return remaining meetings minus any No Meeting Dates (if applic.)
+	}
+	
+	public static int mtgstoTwoDefDates() { //calculate meetings between two definable dates
+		//variable definitions
+		int year = 0, month = 0, date = 0;
+		int year1 = 0, month1 = 0, date1 = 0;
+		int tempchecker = 0, temp = 0;
+		Calendar tempcal;
+		int index = 0; //index of day of the week
+		int remaining_mtgs; //remaining meetings before end of year
+				
+		//user inputs
+		System.out.println("You are entering two dates to find the number of meetings between them.");
+		System.out.println("\nFor the first date to read between:\n");	
+		System.out.print("Please enter the year to read until: ");
+		tempchecker = 0;
 		while(tempchecker == 0) {
 			try {
 				temp = Integer.parseInt(scan.nextLine());
@@ -430,250 +554,126 @@ public class Meeting_Tracker {
 		//set other date
 		setOtherDate(year, month - 1, date);
 		
+		System.out.println("\nFor the second date to read between:\n");
+		System.out.print("Please enter the year to read until: ");
+		tempchecker = 0;
+		while(tempchecker == 0) {
+			try {
+				temp = Integer.parseInt(scan.nextLine());
+				year1 = temp;
+				tempchecker = 1;
+			}
+			catch(NumberFormatException e) {
+				System.out.println("Please enter an integer.");
+			}
+		}
+		while(year1 < cal.get(Calendar.YEAR) || year1 > cal.get(Calendar.YEAR) + 2 ) { //arbitrarily limited to up to 2 years in the future
+			System.out.println("Invalid year entered, please try again. (Please note this works up to two years in the future.)");
+			tempchecker = 0;
+			while(tempchecker == 0) {
+				try {
+					temp = Integer.parseInt(scan.nextLine());
+					year1 = temp;
+					tempchecker = 1;
+				}
+				catch(NumberFormatException e) {
+					System.out.println("Please enter an integer.");
+				}
+			}
+		}
+		System.out.print("Please enter the month to read until: ");
+		tempchecker = 0;
+		while(tempchecker == 0) {
+			try {
+				temp = Integer.parseInt(scan.nextLine());
+				month1 = temp;
+				tempchecker = 1;
+			}
+			catch(NumberFormatException e) {
+				System.out.println("Please enter an integer.");
+			}
+		}
+		while((month1 < cal.get(Calendar.MONTH) && year1 == cal.get(Calendar.YEAR)) || month1 > 12) { 
+			System.out.println("Invalid month entered, please try again. "
+					+ "(Please note date being entered must be further in the future to today)");
+			tempchecker = 0;
+			while(tempchecker == 0) {
+				try {
+					temp = Integer.parseInt(scan.nextLine());
+					month1 = temp;
+					tempchecker = 1;
+				}
+				catch(NumberFormatException e) {
+					System.out.println("Please enter an integer.");
+				}
+			}
+		}
+		System.out.print("Please enter the date to read until: ");
+		tempchecker = 0;
+		while(tempchecker == 0) {
+			try {
+				temp = Integer.parseInt(scan.nextLine());
+				date1 = temp;
+				tempchecker = 1;
+			}
+			catch(NumberFormatException e) {
+				System.out.println("Please enter an integer.");
+			}
+		}
+		while( (date1 < cal.get(Calendar.DATE) && year1 == cal.get(Calendar.YEAR) && month1 == cal.get(Calendar.MONTH) + 1) || date1 > 31) { 
+			System.out.println("Invalid date entered, please try again. "
+					+ "(Please note date being entered must be further in the future to today)");
+			tempchecker = 0;
+			while(tempchecker == 0) {
+				try {
+					temp = Integer.parseInt(scan.nextLine());
+					date1 = temp;
+					tempchecker = 1;
+				}
+				catch(NumberFormatException e) {
+					System.out.println("Please enter an integer.");
+				}
+			}
+		}
+		//set other date
+		setOtherDate2(year1, month1 - 1, date1);
 		
+		if(other_date.getTimeInMillis() > other_date_2.getTimeInMillis()) {
+			tempcal = other_date_2;
+			other_date_2 = other_date;
+			other_date = tempcal;
+		}
 		//find ms between current day and other date
-		long start = cal.getTimeInMillis(); //today's date in ms
-		long end = other_date.getTimeInMillis(); //other date in ms
+		long start = other_date.getTimeInMillis(); //date 1's date in ms
+		long end = other_date_2.getTimeInMillis(); //date 2's date in ms
 		long ms_to_days = 1000*60*60*24; //ms * sec * min * hrs
-		long days_to_other_date = (end-start)/ms_to_days; //days to other date
-		String strDate = dateformat.format(cal.getTime()); //current day of the week
+		long days_to_other_date = java.lang.Math.abs(end - start)/ms_to_days; //days to other date
+		String strDate = dateformat.format(other_date.getTime()); //current day of the week
 		strDate = strDate.substring(0,3); //just the day of the week
-		
 		//sets index to be the index of the current day (begins at 0)
 		for(int i = 0; i < days.length; i++) {
 			if(days[i].contains(strDate)) {
 				index = i;
 			}
 		}
-		
+				
 		//moves to day of next meeting
-		while(index != getMtgDayInt()) { //checks index against index of meeting day
+		while(index != getMtgDayInt() && days_to_other_date > 0) { //checks index against index of meeting day
 			days_to_other_date --; //changes amount of days to other date
 			index++; //keeps changing index if it does not equal index of meeting day
 			if(index == 7) //rolls index over if meeting day is prior to current day of week
 				index = 0;
 		}
 		//remaining meetings is equal to 1 plus remaining days divided by 7
-		remaining_mtgs = 1 + ((int)days_to_other_date/7);
+		if(days_to_other_date > 7)
+			remaining_mtgs = 1 + ((int)days_to_other_date/7);
+		else
+			remaining_mtgs = 0 + ((int)days_to_other_date/7);
 		
-		return remaining_mtgs - checkNoMtgDate(cal, other_date);
+		return remaining_mtgs - checkNoMtgDate(other_date, other_date_2);
 	}
 	
-	public static int mtgstoTwoDefDates() {
-		//variable definitions
-				int year = 0, month = 0, date = 0;
-				int year1 = 0, month1 = 0, date1 = 0;
-				int tempchecker = 0, temp = 0;
-				Calendar tempcal;
-				int index = 0; //index of day of the week
-				int remaining_mtgs; //remaining meetings before end of year
-				
-				//user inputs
-				System.out.println("You are entering two dates to find the number of meetings between them.");
-				System.out.println("\nFor the first date to read between:\n");	
-				System.out.print("Please enter the year to read until: ");
-				tempchecker = 0;
-				while(tempchecker == 0) {
-					try {
-						temp = Integer.parseInt(scan.nextLine());
-						year = temp;
-						tempchecker = 1;
-					}
-					catch(NumberFormatException e) {
-						System.out.println("Please enter an integer.");
-					}
-				}
-				while(year < cal.get(Calendar.YEAR) || year > cal.get(Calendar.YEAR) + 2 ) { //arbitrarily limited to up to 2 years in the future
-					System.out.println("Invalid year entered, please try again. (Please note this works up to two years in the future.)");
-					tempchecker = 0;
-					while(tempchecker == 0) {
-						try {
-							temp = Integer.parseInt(scan.nextLine());
-							year = temp;
-							tempchecker = 1;
-						}
-						catch(NumberFormatException e) {
-							System.out.println("Please enter an integer.");
-						}
-					}
-				}
-				System.out.print("Please enter the month to read until: ");
-				tempchecker = 0;
-				while(tempchecker == 0) {
-					try {
-						temp = Integer.parseInt(scan.nextLine());
-						month = temp;
-						tempchecker = 1;
-					}
-					catch(NumberFormatException e) {
-						System.out.println("Please enter an integer.");
-					}
-				}
-				while((month < cal.get(Calendar.MONTH) && year == cal.get(Calendar.YEAR)) || month > 12) { 
-					System.out.println("Invalid month entered, please try again. "
-							+ "(Please note date being entered must be further in the future to today)");
-					tempchecker = 0;
-					while(tempchecker == 0) {
-						try {
-							temp = Integer.parseInt(scan.nextLine());
-							month = temp;
-							tempchecker = 1;
-						}
-						catch(NumberFormatException e) {
-							System.out.println("Please enter an integer.");
-						}
-					}
-				}
-				System.out.print("Please enter the date to read until: ");
-				tempchecker = 0;
-				while(tempchecker == 0) {
-					try {
-						temp = Integer.parseInt(scan.nextLine());
-						date = temp;
-						tempchecker = 1;
-					}
-					catch(NumberFormatException e) {
-						System.out.println("Please enter an integer.");
-					}
-				}
-				while( (date < cal.get(Calendar.DATE) && year == cal.get(Calendar.YEAR) && month == cal.get(Calendar.MONTH) + 1) || date > 31) { 
-					System.out.println("Invalid date entered, please try again. "
-							+ "(Please note date being entered must be further in the future to today)");
-					tempchecker = 0;
-					while(tempchecker == 0) {
-						try {
-							temp = Integer.parseInt(scan.nextLine());
-							date = temp;
-							tempchecker = 1;
-						}
-						catch(NumberFormatException e) {
-							System.out.println("Please enter an integer.");
-						}
-					}
-				}
-				//set other date
-				setOtherDate(year, month - 1, date);
-				
-				System.out.println("\nFor the second date to read between:\n");
-				System.out.print("Please enter the year to read until: ");
-				tempchecker = 0;
-				while(tempchecker == 0) {
-					try {
-						temp = Integer.parseInt(scan.nextLine());
-						year1 = temp;
-						tempchecker = 1;
-					}
-					catch(NumberFormatException e) {
-						System.out.println("Please enter an integer.");
-					}
-				}
-				while(year1 < cal.get(Calendar.YEAR) || year1 > cal.get(Calendar.YEAR) + 2 ) { //arbitrarily limited to up to 2 years in the future
-					System.out.println("Invalid year entered, please try again. (Please note this works up to two years in the future.)");
-					tempchecker = 0;
-					while(tempchecker == 0) {
-						try {
-							temp = Integer.parseInt(scan.nextLine());
-							year1 = temp;
-							tempchecker = 1;
-						}
-						catch(NumberFormatException e) {
-							System.out.println("Please enter an integer.");
-						}
-					}
-				}
-				System.out.print("Please enter the month to read until: ");
-				tempchecker = 0;
-				while(tempchecker == 0) {
-					try {
-						temp = Integer.parseInt(scan.nextLine());
-						month1 = temp;
-						tempchecker = 1;
-					}
-					catch(NumberFormatException e) {
-						System.out.println("Please enter an integer.");
-					}
-				}
-				while((month1 < cal.get(Calendar.MONTH) && year1 == cal.get(Calendar.YEAR)) || month1 > 12) { 
-					System.out.println("Invalid month entered, please try again. "
-							+ "(Please note date being entered must be further in the future to today)");
-					tempchecker = 0;
-					while(tempchecker == 0) {
-						try {
-							temp = Integer.parseInt(scan.nextLine());
-							month1 = temp;
-							tempchecker = 1;
-						}
-						catch(NumberFormatException e) {
-							System.out.println("Please enter an integer.");
-						}
-					}
-				}
-				System.out.print("Please enter the date to read until: ");
-				tempchecker = 0;
-				while(tempchecker == 0) {
-					try {
-						temp = Integer.parseInt(scan.nextLine());
-						date1 = temp;
-						tempchecker = 1;
-					}
-					catch(NumberFormatException e) {
-						System.out.println("Please enter an integer.");
-					}
-				}
-				while( (date1 < cal.get(Calendar.DATE) && year1 == cal.get(Calendar.YEAR) && month1 == cal.get(Calendar.MONTH) + 1) || date1 > 31) { 
-					System.out.println("Invalid date entered, please try again. "
-							+ "(Please note date being entered must be further in the future to today)");
-					tempchecker = 0;
-					while(tempchecker == 0) {
-						try {
-							temp = Integer.parseInt(scan.nextLine());
-							date1 = temp;
-							tempchecker = 1;
-						}
-						catch(NumberFormatException e) {
-							System.out.println("Please enter an integer.");
-						}
-					}
-				}
-				//set other date
-				setOtherDate2(year1, month1 - 1, date1);
-				
-				if(other_date.getTimeInMillis() > other_date_2.getTimeInMillis()) {
-					tempcal = other_date_2;
-					other_date_2 = other_date;
-					other_date = tempcal;
-				}
-				//find ms between current day and other date
-				long start = other_date.getTimeInMillis(); //date 1's date in ms
-				long end = other_date_2.getTimeInMillis(); //date 2's date in ms
-				long ms_to_days = 1000*60*60*24; //ms * sec * min * hrs
-				long days_to_other_date = java.lang.Math.abs(end - start)/ms_to_days; //days to other date
-				String strDate = dateformat.format(other_date.getTime()); //current day of the week
-				strDate = strDate.substring(0,3); //just the day of the week
-				//sets index to be the index of the current day (begins at 0)
-				for(int i = 0; i < days.length; i++) {
-					if(days[i].contains(strDate)) {
-						index = i;
-					}
-				}
-				
-				//moves to day of next meeting
-				while(index != getMtgDayInt() && days_to_other_date > 0) { //checks index against index of meeting day
-					days_to_other_date --; //changes amount of days to other date
-					index++; //keeps changing index if it does not equal index of meeting day
-					if(index == 7) //rolls index over if meeting day is prior to current day of week
-						index = 0;
-				}
-				//remaining meetings is equal to 1 plus remaining days divided by 7
-				if(days_to_other_date > 7)
-					remaining_mtgs = 1 + ((int)days_to_other_date/7);
-				else
-					remaining_mtgs = 0 + ((int)days_to_other_date/7);
-				
-				return remaining_mtgs - checkNoMtgDate(other_date, other_date_2);
-	}
-	
-	public static int mtgstoTwoDefDates(Calendar d1, Calendar d2) {
+	public static int mtgstoTwoDefDates(Calendar d1, Calendar d2) { //calc meetings between two definable dates (for input file only)
 		//variable definitions
 		Calendar tempcal;
 		int index = 0; //index of day of the week
@@ -720,15 +720,15 @@ public class Meeting_Tracker {
 		return remaining_mtgs - checkNoMtgDate(other_date, other_date_2);
 	}
 	
-	public static void setOtherDate(int year, int month, int date) {
+	public static void setOtherDate(int year, int month, int date) { //set variable other_date
 		other_date.set(year, month, date);
 	}
 	
-	public static void setOtherDate2(int year, int month, int date) {
+	public static void setOtherDate2(int year, int month, int date) { //set variable other_date_2
 		other_date_2.set(year, month, date);
 	}
 
-	public static int changeMtgDay() {
+	public static int changeMtgDay() { //change meeting day (also changes index_mtg_day)
 		System.out.println("Please enter a new meeting day using the index value.");
 		printDays();
 		System.out.println(" 1.   2.   3.   4.   5.   6.   7.");
@@ -761,7 +761,7 @@ public class Meeting_Tracker {
 		return -1;
 	}
 
-	public static void changeMtgDay(String newDay) {
+	public static void changeMtgDay(String newDay) { //change meeting day (for input file only)
 		switch(newDay) {
 		case "Sun":
 			setIndexMtgDay(1);
@@ -824,7 +824,7 @@ public class Meeting_Tracker {
 		}
 	}
 	
-	public static void setIndexMtgDay(int x) {
+	public static void setIndexMtgDay(int x) { //set the index of the meeting day
 		if(x <= 7 && x >= 1) {
 			index_mtg_day = x;
 		}
@@ -832,15 +832,15 @@ public class Meeting_Tracker {
 			System.out.println("Invalid index entered. Please try again.");
 	}
 	
-	public static String getMtgDay() {
+	public static String getMtgDay() { //get a string of the meeting day
 		return mtg_day;
 	}
 	
-	public static int getMtgDayInt() {
+	public static int getMtgDayInt() { //get the index of the meeting day
 		return index_mtg_day;
 	}
 	
-	public static void printDays() {
+	public static void printDays() { //print a list of weekdays
 		System.out.println("Possible Days:");
 		for(int i = 0; i < days.length - 1; i++) {
 			System.out.print(days[i] + ", ");
@@ -848,20 +848,20 @@ public class Meeting_Tracker {
 		System.out.println(days[days.length - 1]);
 	}
 
-	public static int checkNoMtgDate(Calendar cal1, Calendar cal2)
-	{
+	public static int checkNoMtgDate(Calendar cal1, Calendar cal2) { //check no meeting dates
+		//variables only for this function
 		int subtractmtgs = 0;
 		Calendar temp;
 		long date1ms = cal1.getTimeInMillis();
 		long date2ms = cal2.getTimeInMillis();
 		long tempms;
-		if(date1ms > date2ms)
+		if(date1ms > date2ms) //check if dates need to be flipped because one is future to the other
 		{
 			temp = cal1;
 			cal1 = cal2;
 			cal2 = temp;
 		}
-		for(int i = 0; i < noMtgDates.size(); i++) {
+		for(int i = 0; i < noMtgDates.size(); i++) { //check if there is a collision
 			temp = noMtgDates.get(i);
 			tempms = temp.getTimeInMillis();
 			if((tempms >= date1ms && tempms <= date2ms) && (temp.get(Calendar.DAY_OF_WEEK) == getMtgDayInt()) )
