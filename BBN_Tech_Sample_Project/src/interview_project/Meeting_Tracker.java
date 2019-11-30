@@ -1,11 +1,12 @@
 package interview_project;
+import java.io.*;
 import java.text.*;
 import java.util.*;
 
 
 public class Meeting_Tracker {
 	static String[] days = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-	static Vector noMtgDates = new Vector();
+	static Vector<Calendar> noMtgDates = new Vector<Calendar>();
 	static String mtg_day = "Wed";
 	static int index_mtg_day = 4; //index based on DAY_OF_WEEK (e.g. Sun. is 1, Mon. is 2 etc.)
 	static Calendar cal = Calendar.getInstance();
@@ -17,14 +18,15 @@ public class Meeting_Tracker {
 	
 	public static void main(String[] args) {
 		int temp = 0, option_tracker = 0, whilechecker = 0, tempchecker = 0;
-		int number_of_options = 9;
+		int number_of_options = 10;
+		String filename;
 		Meeting_Tracker x = new Meeting_Tracker();
 		
 		System.out.println("Welcome to this portion of the Calendar/Scheduling Application.");
 		System.out.println("Please note that the application factors in how many meetings will be missed due to user-specified holidays.");
 		System.out.println("To view this project on github, please see https://github.com/dsatagaj/BBN-Sample-Project.");
 		System.out.println("To give feedback to David Satagaj, the creator, please email drsatagaj@liberty.edu\n\n");
-		
+		System.out.println(System.getProperty("user.dir"));
 		while (whilechecker == 0)
 		{
 			printOptions();
@@ -78,6 +80,16 @@ public class Meeting_Tracker {
 			case 8 : //option for printing no meeting dates
 				printNoMeetingDates();
 				break;
+			case 9 : //option for reading input from file
+				System.out.println("Please enter the name of the input file.");
+				filename = scan.nextLine();
+				try {
+					readFromInputFile(filename);
+				}
+				catch(IOException e){
+					System.out.println("Cannot find file. Please check that the file is in the correct folder or specify the path.");
+				}
+				break;	
 			default:
 				System.out.println("Thank you for using this program.");
 				whilechecker = -1;
@@ -87,11 +99,51 @@ public class Meeting_Tracker {
 		}
 
 	}
+
+	public static void readFromInputFile(String filename) throws IOException {
+		boolean filechecker = false;
+		BufferedReader reader = new BufferedReader(new FileReader(filename));
+		String cell;
+		int numMtgs;
+		Vector<String> data = new Vector<String>();
+		
+		
+		filechecker = true;
+		if(filechecker) {
+			while((cell = reader.readLine()) != null) {
+				if(!cell.contains("#")) {
+					String[] temp = cell.split(",");
+					for(int i = 0; i < temp.length; i++) {
+						temp[i] = temp[i].replace(" ", "");
+						data.add(temp[i]);
+					}
+				}
+			}
+		}
+		for(int i = 0; i < data.size() - 1; i = i + 3) {
+			if(data.get(i).contains("-") && data.get(i+1).contains("-") && data.get(i+2).contains("day")) {
+				String[] day1 = data.get(i).split("-");
+				String[] day2 = data.get(i+1).split("-");
+				String dow = data.get(i+2).substring(0,3);
+				setOtherDate(Integer.parseInt(day1[0]), Integer.parseInt(day1[1]), Integer.parseInt(day1[2]));
+				setOtherDate(Integer.parseInt(day2[0]), Integer.parseInt(day2[1]), Integer.parseInt(day2[2]));
+				changeMtgDay(dow);
+				numMtgs = mtgstoTwoDefDates(other_date, other_date_2);
+				System.out.println("The number of meetings between " + dateformat.format(other_date.getTime()) + 
+						" and " + dateformat.format(other_date_2.getTime()) + " is " + numMtgs);
+				
+			}
+			else {
+				System.out.println("Error parsing file, please check file syntax.");
+			}
+			
+		}
+		reader.close();
+	}
 	
 	public static void addNoMeetingDate()
 	{
 		int temp = 0, tempchecker = 0, year = 0, month = 0, date = 0;
-		int index = 0; //index of day of the week
 		Calendar tempcal = Calendar.getInstance();
 		
 		//user inputs
@@ -214,7 +266,7 @@ public class Meeting_Tracker {
 					System.out.println("Please enter an integer.");
 				}
 			}
-			tempcal = (Calendar)noMtgDates.get(todelete - 1);
+			tempcal = noMtgDates.get(todelete - 1);
 			System.out.println("The date that is being deleted is " + dateformat.format(tempcal.getTime()));
 			noMtgDates.remove(todelete - 1);
 		}
@@ -231,7 +283,7 @@ public class Meeting_Tracker {
 		if(ret == 0) {
 			System.out.println("The current No Meeting Dates are: ");
 			for(int i = 0; i < noMtgDates.size(); i++) {
-				temp = (Calendar)noMtgDates.get(i);
+				temp = noMtgDates.get(i);
 				System.out.println((i + 1) + ". " + dateformat.format(temp.getTime()));
 			}
 		}
@@ -248,7 +300,8 @@ public class Meeting_Tracker {
 		System.out.println("\t~6. Add a No Meeting Day");
 		System.out.println("\t~7. Remove No Meeting Days");
 		System.out.println("\t~8. Print Current No Meeting Days");
-		System.out.println("\t~9. Exit Program");
+		System.out.println("\t~9. Parse an Input file (format: input.csv)");
+		System.out.println("\t~10. Exit Program");
 	}
 	
 	public static int mtgstoEndofYear()
@@ -620,42 +673,59 @@ public class Meeting_Tracker {
 				return remaining_mtgs - checkNoMtgDate(other_date, other_date_2);
 	}
 	
-	public static void setOtherDate(int year, int month, int date) {
-		int calyear = cal.get(Calendar.YEAR);
-		int calmonth = cal.get(Calendar.MONTH);
-		int caldate = cal.get(Calendar.DATE);
-		if(year < calyear) {
-			System.out.println("Invalid Year. Please try setting a future date.");
+	public static int mtgstoTwoDefDates(Calendar d1, Calendar d2) {
+		//variable definitions
+		Calendar tempcal;
+		int index = 0; //index of day of the week
+		int remaining_mtgs; //remaining meetings before end of year
+		
+				
+		//set other date
+		setOtherDate(d1.get(Calendar.YEAR), d1.get(Calendar.MONTH), d1.get(Calendar.DATE));				
+		//set other date 2
+		setOtherDate2(d2.get(Calendar.YEAR), d2.get(Calendar.MONTH), d2.get(Calendar.DATE));
+				
+		if(other_date.getTimeInMillis() > other_date_2.getTimeInMillis()) {
+			tempcal = other_date_2;
+			other_date_2 = other_date;
+			other_date = tempcal;
 		}
-		else if (year == calyear && month < calmonth) {
-			System.out.println("Invalid Month. Please try setting a future date.");
+		//find ms between current day and other date
+		long start = other_date.getTimeInMillis(); //date 1's date in ms
+		long end = other_date_2.getTimeInMillis(); //date 2's date in ms
+		long ms_to_days = 1000*60*60*24; //ms * sec * min * hrs
+		long days_to_other_date = java.lang.Math.abs(end - start)/ms_to_days; //days to other date
+		String strDate = dateformat.format(other_date.getTime()); //current day of the week
+		strDate = strDate.substring(0,3); //just the day of the week
+		//sets index to be the index of the current day (begins at 0)
+		for(int i = 0; i < days.length; i++) {
+			if(days[i].contains(strDate)) {
+				index = i;
+			}
 		}
-		else if (year == calyear && month == calmonth && date < caldate) {
-			System.out.println("Invalid Date. Please try setting a future date.");
+				
+		//moves to day of next meeting
+		while(index != getMtgDayInt() && days_to_other_date > 0) { //checks index against index of meeting day
+			days_to_other_date --; //changes amount of days to other date
+			index++; //keeps changing index if it does not equal index of meeting day
+			if(index == 7) //rolls index over if meeting day is prior to current day of week
+				index = 0;
 		}
+		//remaining meetings is equal to 1 plus remaining days divided by 7
+		if(days_to_other_date > 7)
+			remaining_mtgs = 1 + ((int)days_to_other_date/7);
 		else
-		{
-			other_date.set(year, month, date);
-		}
+			remaining_mtgs = 0 + ((int)days_to_other_date/7);
+		
+		return remaining_mtgs - checkNoMtgDate(other_date, other_date_2);
+	}
+	
+	public static void setOtherDate(int year, int month, int date) {
+		other_date.set(year, month, date);
 	}
 	
 	public static void setOtherDate2(int year, int month, int date) {
-		int calyear = cal.get(Calendar.YEAR);
-		int calmonth = cal.get(Calendar.MONTH);
-		int caldate = cal.get(Calendar.DATE);
-		if(year < calyear) {
-			System.out.println("Invalid Year. Please try setting a future date.");
-		}
-		else if (year == calyear && month < calmonth) {
-			System.out.println("Invalid Month. Please try setting a future date.");
-		}
-		else if (year == calyear && month == calmonth && date < caldate) {
-			System.out.println("Invalid Date. Please try setting a future date.");
-		}
-		else
-		{
-			other_date_2.set(year, month, date);
-		}
+		other_date_2.set(year, month, date);
 	}
 
 	public static int changeMtgDay() {
@@ -689,6 +759,69 @@ public class Meeting_Tracker {
 		}
 		System.out.println("An invalid day was entered. Please try again.");
 		return -1;
+	}
+
+	public static void changeMtgDay(String newDay) {
+		switch(newDay) {
+		case "Sun":
+			setIndexMtgDay(1);
+			mtg_day = newDay;
+			break;
+		case "sun":
+			setIndexMtgDay(1);
+			mtg_day = newDay;
+			break;
+		case "Mon":
+			setIndexMtgDay(2);
+			mtg_day = newDay;
+			break;
+		case "mon":
+			setIndexMtgDay(2);
+			mtg_day = newDay;
+			break;
+		case "Tue":
+			setIndexMtgDay(3);
+			mtg_day = newDay;
+			break;
+		case "tue":
+			setIndexMtgDay(3);
+			mtg_day = newDay;
+			break;
+		case "Wed":
+			setIndexMtgDay(4);
+			mtg_day = newDay;
+			break;
+		case "wed":
+			setIndexMtgDay(4);
+			mtg_day = newDay;
+			break;
+		case "Thu":
+			setIndexMtgDay(5);
+			mtg_day = newDay;
+			break;
+		case "thu":
+			setIndexMtgDay(5);
+			mtg_day = newDay;
+			break;
+		case "Fri":
+			setIndexMtgDay(6);
+			mtg_day = newDay;
+			break;
+		case "fri":
+			setIndexMtgDay(6);
+			mtg_day = newDay;
+			break;
+		case "Sat":
+			setIndexMtgDay(7);
+			mtg_day = newDay;
+			break;
+		case "sat":
+			setIndexMtgDay(7);
+			mtg_day = newDay;
+			break;
+		default:
+			System.out.println("An Invalid day was entered, please check syntax.");
+		}
 	}
 	
 	public static void setIndexMtgDay(int x) {
@@ -729,7 +862,7 @@ public class Meeting_Tracker {
 			cal2 = temp;
 		}
 		for(int i = 0; i < noMtgDates.size(); i++) {
-			temp = (Calendar)noMtgDates.get(i);
+			temp = noMtgDates.get(i);
 			tempms = temp.getTimeInMillis();
 			if((tempms >= date1ms && tempms <= date2ms) && (temp.get(Calendar.DAY_OF_WEEK) == getMtgDayInt()) )
 			{
