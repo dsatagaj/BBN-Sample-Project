@@ -1,7 +1,9 @@
 # BBN-Sample-Project
 This coding project was created as a sample for BBN Technologies (a subsidiary of Raytheon).
-Please note that the in-depth solution is under the folder called: BBN_Tech_Sample_Project
-Please note that the MVP solution is under the folder called: BBN_Tech_Sample_Project_MVP
+Please note that the in-depth solution is under the folder called: BBN_Tech_Sample_Project\
+Please note that the MVP solution is under the folder called: BBN_Tech_Sample_Project_MVP\
+
+Also, please note that an input.csv file has been included under each project in order to show what a proper input file should look like.
 
 # Notes for the in-depth Solution
 The in-depth solution has the operability to take user inputs or an input file. This is designed such that if the user has
