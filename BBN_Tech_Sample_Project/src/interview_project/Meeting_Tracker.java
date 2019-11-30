@@ -26,7 +26,7 @@ public class Meeting_Tracker {
 		System.out.println("Please note that the application factors in how many meetings will be missed due to user-specified holidays.");
 		System.out.println("To view this project on github, please see https://github.com/dsatagaj/BBN-Sample-Project.");
 		System.out.println("To give feedback to David Satagaj, the creator, please email drsatagaj@liberty.edu\n\n");
-		System.out.println(System.getProperty("user.dir"));
+		//System.out.println(System.getProperty("user.dir"));
 		while (whilechecker == 0)
 		{
 			printOptions();
